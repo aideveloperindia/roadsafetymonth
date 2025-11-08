@@ -1,0 +1,45 @@
+{
+  "appName": "Telangana Road Safety Month",
+  "home": "Home",
+  "info": "Information",
+  "rules": "Rules",
+  "guides": "Guides",
+  "prevention": "Prevention",
+  "quiz": "Quiz",
+  "simulation": "Simulation",
+  "certificates": "Certificates",
+  "events": "Events",
+  "admin": "Admin",
+  "verify": "Verify",
+  "takeQuiz": "Take the Quiz",
+  "generateCertificate": "Generate Certificate",
+  "logEvent": "Log an Event",
+  "download": "Download",
+  "submit": "Submit",
+  "cancel": "Cancel",
+  "save": "Save",
+  "edit": "Edit",
+  "delete": "Delete",
+  "login": "Login",
+  "logout": "Logout",
+  "email": "Email",
+  "password": "Password",
+  "name": "Name",
+  "institution": "Institution",
+  "type": "Type",
+  "date": "Date",
+  "valid": "Valid",
+  "invalid": "Invalid",
+  "loading": "Loading...",
+  "error": "Error",
+  "success": "Success"
+}
+
+
+
+
+
+
+
+
+
