@@ -1,14 +1,24 @@
 "use client";
 
+type JsPdfModule = typeof import("jspdf");
+
 export async function exportCertificateToPdf(element: HTMLElement, fileName: string) {
   if (!element) {
     throw new Error("Certificate element not found");
   }
 
   const html2canvasModule = await import("html2canvas");
-  const { jsPDF } = await import("jspdf");
+  const jsPDFModule: JsPdfModule = await import("jspdf");
 
   const html2canvas = html2canvasModule.default ?? html2canvasModule;
+  const JsPDFConstructor =
+    (jsPDFModule.default as JsPdfModule["default"] | undefined) ??
+    (jsPDFModule as { jsPDF?: JsPdfModule["default"] }).jsPDF;
+
+  if (!JsPDFConstructor) {
+    throw new Error("Failed to load jsPDF module");
+  }
+
   const scale = 3.125; // ~300 DPI based on 96 DPI default
 
   const canvas = await html2canvas(element, {
@@ -50,7 +60,7 @@ export async function exportCertificateToPdf(element: HTMLElement, fileName: str
   const pdfWidth = pxToPt(canvas.width);
   const pdfHeight = pxToPt(canvas.height);
 
-  const pdf = new jsPDF({
+  const pdf = new JsPDFConstructor({
     orientation: pdfWidth > pdfHeight ? "landscape" : "portrait",
     unit: "pt",
     format: [pdfWidth, pdfHeight],

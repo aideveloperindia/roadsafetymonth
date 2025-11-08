@@ -39,24 +39,24 @@ export default function SimulationPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="helmet" className="w-full space-y-4">
-            <div className="space-y-2">
-              <TabsList className="grid w-full grid-cols-1 sm:grid-cols-3 rounded-xl bg-emerald-50 p-2 gap-2 sm:gap-0">
+          <Tabs defaultValue="helmet" className="w-full">
+            <div className="space-y-3">
+              <TabsList className="grid w-full grid-cols-1 sm:grid-cols-3 rounded-xl bg-emerald-50 p-2 gap-2 sm:gap-0 shadow-sm">
                 <TabsTrigger
                   value="helmet"
-                  className="data-[state=active]:bg-white data-[state=active]:shadow flex w-full items-center justify-center rounded-lg py-2 text-sm font-semibold"
+                  className="data-[state=active]:bg-white data-[state=active]:shadow flex h-12 w-full items-center justify-center rounded-lg px-3 text-sm font-semibold"
                 >
                   <ShieldCheck className="h-4 w-4 mr-2" /> No Helmet
                 </TabsTrigger>
                 <TabsTrigger
                   value="triple"
-                  className="data-[state=active]:bg-white data-[state=active]:shadow flex w-full items-center justify-center rounded-lg py-2 text-sm font-semibold"
+                  className="data-[state=active]:bg-white data-[state=active]:shadow flex h-12 w-full items-center justify-center rounded-lg px-3 text-sm font-semibold"
                 >
                   <ShieldCheck className="h-4 w-4 mr-2" /> Triple Riding
                 </TabsTrigger>
                 <TabsTrigger
                   value="drunk"
-                  className="data-[state=active]:bg-white data-[state=active]:shadow flex w-full items-center justify-center rounded-lg py-2 text-sm font-semibold"
+                  className="data-[state=active]:bg-white data-[state=active]:shadow flex h-12 w-full items-center justify-center rounded-lg px-3 text-sm font-semibold"
                 >
                   <WineOff className="h-4 w-4 mr-2" /> No Drunk Driving
                 </TabsTrigger>
@@ -64,15 +64,15 @@ export default function SimulationPage() {
               <p className="text-xs text-slate-500 text-center sm:hidden">Tap a tab above to switch the scenario.</p>
             </div>
 
-            <TabsContent value="helmet" className="mt-4">
+            <TabsContent value="helmet" className="mt-6">
               <HelmetPrototype />
             </TabsContent>
 
-            <TabsContent value="triple" className="mt-4">
+            <TabsContent value="triple" className="mt-6">
               <TripleRidingSimulation />
             </TabsContent>
 
-            <TabsContent value="drunk" className="mt-4">
+            <TabsContent value="drunk" className="mt-6">
               <DrunkDriveSimulation />
             </TabsContent>
           </Tabs>
