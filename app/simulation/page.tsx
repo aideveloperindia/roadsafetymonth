@@ -39,29 +39,40 @@ export default function SimulationPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="helmet" className="w-full">
-            <TabsList className="grid w-full grid-cols-1 sm:grid-cols-3 mb-6 rounded-xl bg-emerald-50 p-2 gap-2 sm:gap-0">
-              <TabsTrigger value="helmet" className="data-[state=active]:bg-white data-[state=active]:shadow flex items-center justify-center">
-                <ShieldCheck className="h-4 w-4 mr-2" /> No Helmet
-              </TabsTrigger>
-              <TabsTrigger value="triple" className="data-[state=active]:bg-white data-[state=active]:shadow flex items-center justify-center">
-                <ShieldCheck className="h-4 w-4 mr-2" /> Triple Riding
-              </TabsTrigger>
-              <TabsTrigger value="drunk" className="data-[state=active]:bg-white data-[state=active]:shadow flex items-center justify-center">
-                <WineOff className="h-4 w-4 mr-2" /> No Drunk Driving
-              </TabsTrigger>
-            </TabsList>
-            <p className="text-xs text-slate-500 text-center sm:hidden mb-4">Tap the tabs above to switch simulations.</p>
+          <Tabs defaultValue="helmet" className="w-full space-y-4">
+            <div className="space-y-2">
+              <TabsList className="grid w-full grid-cols-1 sm:grid-cols-3 rounded-xl bg-emerald-50 p-2 gap-2 sm:gap-0">
+                <TabsTrigger
+                  value="helmet"
+                  className="data-[state=active]:bg-white data-[state=active]:shadow flex w-full items-center justify-center rounded-lg py-2 text-sm font-semibold"
+                >
+                  <ShieldCheck className="h-4 w-4 mr-2" /> No Helmet
+                </TabsTrigger>
+                <TabsTrigger
+                  value="triple"
+                  className="data-[state=active]:bg-white data-[state=active]:shadow flex w-full items-center justify-center rounded-lg py-2 text-sm font-semibold"
+                >
+                  <ShieldCheck className="h-4 w-4 mr-2" /> Triple Riding
+                </TabsTrigger>
+                <TabsTrigger
+                  value="drunk"
+                  className="data-[state=active]:bg-white data-[state=active]:shadow flex w-full items-center justify-center rounded-lg py-2 text-sm font-semibold"
+                >
+                  <WineOff className="h-4 w-4 mr-2" /> No Drunk Driving
+                </TabsTrigger>
+              </TabsList>
+              <p className="text-xs text-slate-500 text-center sm:hidden">Tap a tab above to switch the scenario.</p>
+            </div>
 
-            <TabsContent value="helmet">
+            <TabsContent value="helmet" className="mt-4">
               <HelmetPrototype />
             </TabsContent>
 
-            <TabsContent value="triple">
+            <TabsContent value="triple" className="mt-4">
               <TripleRidingSimulation />
             </TabsContent>
 
-            <TabsContent value="drunk">
+            <TabsContent value="drunk" className="mt-4">
               <DrunkDriveSimulation />
             </TabsContent>
           </Tabs>

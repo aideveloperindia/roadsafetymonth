@@ -5,15 +5,17 @@ export async function exportCertificateToPdf(element: HTMLElement, fileName: str
     throw new Error("Certificate element not found");
   }
 
-  const html2canvas = (await import("html2canvas")).default;
-  const { default: jsPDF } = await import("jspdf");
+  const html2canvasModule = await import("html2canvas");
+  const { jsPDF } = await import("jspdf");
 
+  const html2canvas = html2canvasModule.default ?? html2canvasModule;
   const scale = 3.125; // ~300 DPI based on 96 DPI default
 
   const canvas = await html2canvas(element, {
     scale,
     backgroundColor: "#ffffff",
     useCORS: true,
+    allowTaint: true,
     onclone: (clonedDocument) => {
       const certificateElement = clonedDocument.querySelector(".certificate-export") as HTMLElement | null;
       if (certificateElement) {
@@ -42,14 +44,18 @@ export async function exportCertificateToPdf(element: HTMLElement, fileName: str
   });
 
   const imgData = canvas.toDataURL("image/png");
+
+  // html2canvas outputs pixels (96 DPI). Convert to points for jsPDF (72 DPI).
+  const pxToPt = (px: number) => (px * 72) / 96;
+  const pdfWidth = pxToPt(canvas.width);
+  const pdfHeight = pxToPt(canvas.height);
+
   const pdf = new jsPDF({
-    orientation: "landscape",
+    orientation: pdfWidth > pdfHeight ? "landscape" : "portrait",
     unit: "pt",
-    format: [canvas.width, canvas.height],
+    format: [pdfWidth, pdfHeight],
   });
 
-  pdf.addImage(imgData, "PNG", 0, 0, canvas.width, canvas.height);
+  pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
   pdf.save(fileName);
 }
-
-

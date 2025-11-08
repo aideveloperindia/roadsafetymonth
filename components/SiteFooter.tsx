@@ -87,7 +87,7 @@ export default function SiteFooter() {
                   <Link href="/certificates/generate">Generate Certificate</Link>
                 </li>
                 <li>
-                  <Link href="/certificates/verify">Verify Certificate</Link>
+                  <Link href="/certificates/generate">Verify Certificate</Link>
                 </li>
                 <li>
                   <Link href="/events">Log an Event</Link>
@@ -119,3 +119,4 @@ export default function SiteFooter() {
     </footer>
   );
 }
+

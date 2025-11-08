@@ -1,11 +1,11 @@
 "use client";
 
-import { Suspense, useEffect, useMemo, useRef } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import Certificate, { CertificateCode, CertificateData } from "@/components/certificates/Certificate";
 import { exportCertificateToPdf } from "@/utils/certificateExport";
-import { Download, ArrowLeft, Award } from "lucide-react";
+import { Download, ArrowLeft, Award, Loader2 } from "lucide-react";
 
 const REQUIRED_PARAMS = ["type", "name", "district", "date"] as const;
 
@@ -37,6 +37,8 @@ function CertificatePreviewContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const certificateRef = useRef<HTMLDivElement>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
 
   useEffect(() => {
     const missingParam = REQUIRED_PARAMS.find((param) => !searchParams.get(param));
@@ -61,8 +63,18 @@ function CertificatePreviewContent() {
   }, [searchParams]);
 
   const handleDownload = async () => {
-    if (!certificateRef.current) return;
-    await exportCertificateToPdf(certificateRef.current, `${data.fullName.replace(/\s+/g, "_")}_certificate.pdf`);
+    if (!certificateRef.current || isDownloading) return;
+    setIsDownloading(true);
+    setDownloadError(null);
+
+    try {
+      await exportCertificateToPdf(certificateRef.current, `${data.fullName.replace(/\s+/g, "_")}_certificate.pdf`);
+    } catch (error) {
+      console.error("Certificate download failed:", error);
+      setDownloadError("Could not generate the PDF. Please retry after a few seconds.");
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   return (
@@ -82,11 +94,25 @@ function CertificatePreviewContent() {
           <Button variant="outline" onClick={() => router.push("/certificates/generate")} className="gap-2">
             <ArrowLeft className="h-4 w-4" /> Back to Form
           </Button>
-          <Button onClick={handleDownload} className="rs-btn-primary gap-2">
-            <Download className="h-4 w-4" /> Download PDF
+          <Button onClick={handleDownload} className="rs-btn-primary gap-2" disabled={isDownloading}>
+            {isDownloading ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" /> Preparing...
+              </>
+            ) : (
+              <>
+                <Download className="h-4 w-4" /> Download PDF
+              </>
+            )}
           </Button>
         </div>
       </div>
+
+      {downloadError && (
+        <div className="rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {downloadError}
+        </div>
+      )}
 
       <div className="rounded-3xl border border-emerald-100 bg-slate-100/80 p-4 md:p-8 shadow-inner">
         <Certificate ref={certificateRef} data={data} />
