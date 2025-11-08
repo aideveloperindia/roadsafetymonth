@@ -8,7 +8,7 @@ import { verifyCertificateUrl } from "@/lib/hmac";
 import { readFileSync, existsSync } from "fs";
 import { join } from "path";
 
-chromium.setGraphicsMode(false);
+chromium.setGraphicsMode = false;
 
 export async function GET(request: NextRequest) {
   try {
@@ -93,7 +93,7 @@ export async function GET(request: NextRequest) {
       args: chromium.args,
       defaultViewport: chromium.defaultViewport,
       executablePath: await chromium.executablePath(),
-      headless: chromium.headless,
+      headless: true,
     });
 
     const page = await browser.newPage();
@@ -107,7 +107,10 @@ export async function GET(request: NextRequest) {
 
     await browser.close();
 
-    return new NextResponse(pdf, {
+    const pdfUint8Array = new Uint8Array(pdf);
+    const pdfBlob = new Blob([pdfUint8Array.buffer], { type: "application/pdf" });
+
+    return new NextResponse(pdfBlob, {
       headers: {
         "Content-Type": "application/pdf",
         "Content-Disposition": `attachment; filename="certificate-${cid}.pdf"`,

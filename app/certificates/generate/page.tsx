@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { Suspense, useEffect, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -83,6 +83,21 @@ const safeDecode = (value: string | null) => {
 };
 
 export default function CertificateGeneratePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="rs-container py-20 flex flex-col items-center gap-4 text-center">
+          <Sparkles className="h-6 w-6 animate-spin text-emerald-600" />
+          <p className="text-slate-600">Loading certificate generator...</p>
+        </div>
+      }
+    >
+      <CertificateGenerateContent />
+    </Suspense>
+  );
+}
+
+function CertificateGenerateContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 

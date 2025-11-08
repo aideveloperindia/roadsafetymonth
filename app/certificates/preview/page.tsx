@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { Suspense, useEffect, useMemo, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import Certificate, { CertificateCode, CertificateData } from "@/components/certificates/Certificate";
@@ -19,6 +19,21 @@ const safeDecode = (value: string | null) => {
 };
 
 export default function CertificatePreviewPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="rs-container py-20 flex flex-col items-center gap-4 text-center">
+          <Award className="h-6 w-6 animate-spin text-emerald-600" />
+          <p className="text-slate-600">Loading certificate preview...</p>
+        </div>
+      }
+    >
+      <CertificatePreviewContent />
+    </Suspense>
+  );
+}
+
+function CertificatePreviewContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const certificateRef = useRef<HTMLDivElement>(null);
