@@ -139,7 +139,7 @@ export default function AdminDashboard() {
           </div>
         </div>
         <div className="rs-table-wrapper">
-          <table className="rs-table text-sm">
+          <table className="rs-table text-sm min-w-[420px]">
             <thead>
               <tr>
                 <th className="text-left">District</th>
@@ -161,6 +161,7 @@ export default function AdminDashboard() {
             </tbody>
           </table>
         </div>
+        <p className="text-xs text-slate-500 sm:hidden">Swipe sideways to check every district entry.</p>
       </div>
 
       <div className="rs-card p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">

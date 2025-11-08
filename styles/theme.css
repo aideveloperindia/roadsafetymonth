@@ -24,8 +24,15 @@ body {
 }
 
 .rs-container {
-  width: min(1100px, 96%);
+  width: min(1100px, 100%);
   margin-inline: auto;
+  padding-inline: clamp(1rem, 4vw, 2.5rem);
+}
+
+@media (min-width: 1024px) {
+  .rs-container {
+    padding-inline: 0;
+  }
 }
 
 .rs-section {
@@ -43,6 +50,13 @@ body {
 .rs-card:hover {
   transform: translateY(-6px);
   box-shadow: var(--rs-shadow-card);
+}
+
+@media (max-width: 640px) {
+  .rs-card {
+    border-radius: 1rem;
+    box-shadow: 0 12px 24px rgba(13, 148, 94, 0.08);
+  }
 }
 
 .rs-chip {
@@ -125,6 +139,20 @@ body {
   z-index: 1;
 }
 
+.rs-roadstrap > * {
+  position: relative;
+  z-index: 1;
+}
+
+.rs-roadstrap::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, rgba(13, 148, 94, 0.08), rgba(255, 255, 255, 0));
+  pointer-events: none;
+  opacity: 0.5;
+}
+
 .rs-roadstrap::before {
   content: none;
 }
@@ -182,6 +210,14 @@ body {
   border: 1px solid rgba(0, 123, 79, 0.2);
 }
 
+@media (max-width: 480px) {
+  .rs-pill-toggle {
+    width: 100%;
+    justify-content: center;
+    gap: 0.25rem;
+  }
+}
+
 .rs-pill-toggle button {
   border-radius: 999px;
   padding: 0.35rem 0.9rem;
@@ -222,8 +258,18 @@ body {
   color: var(--rs-color-primary);
   font-weight: 600;
   box-shadow: 0 14px 30px rgba(0, 123, 79, 0.25);
-  right: 1rem;
-  bottom: 1rem;
+  right: clamp(0.75rem, 4vw, 1.5rem);
+  bottom: clamp(0.75rem, 4vw, 1.5rem);
+}
+
+@media (max-width: 768px) {
+  .rs-floating-badge {
+    position: static;
+    align-self: stretch;
+    justify-content: center;
+    margin-top: 1rem;
+    width: 100%;
+  }
 }
 
 .rs-table-wrapper {
@@ -232,11 +278,14 @@ body {
   border-radius: var(--rs-radius-lg);
   box-shadow: var(--rs-shadow-soft);
   overflow: hidden;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .rs-table {
   width: 100%;
   border-collapse: collapse;
+  min-width: 640px;
 }
 
 .rs-table thead {
@@ -255,6 +304,18 @@ body {
 
 .rs-table tbody tr:hover {
   background: rgba(0, 123, 79, 0.04);
+}
+
+@media (max-width: 768px) {
+  .rs-table {
+    font-size: 0.85rem;
+  }
+
+  .rs-table th,
+  .rs-table td {
+    padding: 0.75rem;
+    white-space: normal;
+  }
 }
 
 .rs-footer-bg {

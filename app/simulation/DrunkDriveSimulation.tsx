@@ -2,6 +2,15 @@
 
 import { useState, useRef, useCallback } from "react";
 
+const BASE_DIMENSIONS = { width: 500, height: 500 };
+const TARGET_HITBOX = {
+  x: 220,
+  y: 180,
+  width: 160,
+  height: 140,
+};
+const MENTOR_SIZE = { width: 120, height: 120 };
+
 export default function DrunkDriveSimulation() {
   const [draggedItem, setDraggedItem] = useState<string | null>(null);
   const [dragOffset, setDragOffset] = useState<[number, number]>([0, 0]);
@@ -13,15 +22,6 @@ export default function DrunkDriveSimulation() {
   const canvasRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-
-  const targetHitbox = {
-    x: 220,
-    y: 180,
-    width: 160,
-    height: 140,
-  };
-
-  const mentorSize = { width: 120, height: 120 };
 
   const handleDragStart = useCallback((e: React.PointerEvent, itemType: string) => {
     if (isCompleted) return;
@@ -35,8 +35,8 @@ export default function DrunkDriveSimulation() {
       const startY = e.clientY - canvasRect.top;
 
       if (itemType === "mentor" && !mentorPosition) {
-        setMentorPosition([startX - mentorSize.width / 2, startY - mentorSize.height / 2]);
-        setDragOffset([mentorSize.width / 2, mentorSize.height / 2]);
+        setMentorPosition([startX - MENTOR_SIZE.width / 2, startY - MENTOR_SIZE.height / 2]);
+        setDragOffset([MENTOR_SIZE.width / 2, MENTOR_SIZE.height / 2]);
       } else if (mentorPosition) {
         setDragOffset([
           e.clientX - canvasRect.left - mentorPosition[0],
@@ -44,7 +44,7 @@ export default function DrunkDriveSimulation() {
         ]);
       }
     }
-  }, [isCompleted, mentorPosition, mentorSize.width, mentorSize.height]);
+  }, [isCompleted, mentorPosition]);
 
   const handleDrag = useCallback((e: React.PointerEvent) => {
     if (!draggedItem || !canvasRef.current || isCompleted) return;
@@ -52,10 +52,10 @@ export default function DrunkDriveSimulation() {
     e.stopPropagation();
 
     const rect = canvasRef.current.getBoundingClientRect();
-    const x = Math.max(0, Math.min(rect.width - mentorSize.width, e.clientX - rect.left - dragOffset[0]));
-    const y = Math.max(0, Math.min(rect.height - mentorSize.height, e.clientY - rect.top - dragOffset[1]));
+    const x = Math.max(0, Math.min(rect.width - MENTOR_SIZE.width, e.clientX - rect.left - dragOffset[0]));
+    const y = Math.max(0, Math.min(rect.height - MENTOR_SIZE.height, e.clientY - rect.top - dragOffset[1]));
     setMentorPosition([x, y]);
-  }, [draggedItem, dragOffset, isCompleted, mentorSize.height, mentorSize.width]);
+  }, [draggedItem, dragOffset, isCompleted]);
 
   const handleDragEnd = useCallback(async () => {
     if (!draggedItem || isCompleted) {
@@ -68,15 +68,24 @@ export default function DrunkDriveSimulation() {
       return;
     }
 
-    const mentorLeft = mentorPosition[0];
-    const mentorRight = mentorPosition[0] + mentorSize.width;
-    const mentorTop = mentorPosition[1];
-    const mentorBottom = mentorPosition[1] + mentorSize.height;
+    const rect = canvasRef.current?.getBoundingClientRect();
+    if (!rect) {
+      setDraggedItem(null);
+      return;
+    }
 
-    const targetLeft = targetHitbox.x;
-    const targetRight = targetHitbox.x + targetHitbox.width;
-    const targetTop = targetHitbox.y;
-    const targetBottom = targetHitbox.y + targetHitbox.height;
+    const scaleX = rect.width / BASE_DIMENSIONS.width;
+    const scaleY = rect.height / BASE_DIMENSIONS.height;
+
+    const mentorLeft = mentorPosition[0];
+    const mentorRight = mentorPosition[0] + MENTOR_SIZE.width;
+    const mentorTop = mentorPosition[1];
+    const mentorBottom = mentorPosition[1] + MENTOR_SIZE.height;
+
+    const targetLeft = TARGET_HITBOX.x * scaleX;
+    const targetRight = (TARGET_HITBOX.x + TARGET_HITBOX.width) * scaleX;
+    const targetTop = TARGET_HITBOX.y * scaleY;
+    const targetBottom = (TARGET_HITBOX.y + TARGET_HITBOX.height) * scaleY;
 
     const overlaps = !(mentorRight < targetLeft || mentorLeft > targetRight || mentorBottom < targetTop || mentorTop > targetBottom);
 
@@ -114,7 +123,7 @@ export default function DrunkDriveSimulation() {
     }
 
     setDraggedItem(null);
-  }, [draggedItem, isCompleted, mentorPosition, mentorSize.height, mentorSize.width, targetHitbox]);
+  }, [draggedItem, isCompleted, mentorPosition]);
 
   return (
     <div className="w-full max-w-5xl mx-auto">
@@ -125,12 +134,16 @@ export default function DrunkDriveSimulation() {
         </p>
       </div>
 
-      <div ref={containerRef} className="flex gap-4 items-start">
-        <div className="flex-1">
+      <p className="text-xs text-slate-500 text-center lg:hidden mt-4">
+        Drag the sobriety mentor card below and drop it on the driver to trigger the safe outcome.
+      </p>
+
+      <div ref={containerRef} className="flex flex-col lg:flex-row gap-4 items-stretch">
+        <div className="flex-1 order-1 lg:order-none w-full">
           <div
             ref={canvasRef}
-            className="relative border-2 border-gray-300 rounded-lg bg-white overflow-hidden"
-            style={{ width: "100%", height: "500px", backgroundColor: "#ffffff" }}
+            className="relative border-2 border-gray-300 rounded-lg bg-white overflow-hidden h-[360px] sm:h-[420px] lg:h-[500px]"
+            style={{ backgroundColor: "#ffffff" }}
             onPointerMove={handleDrag}
             onPointerUp={handleDragEnd}
             onPointerLeave={handleDragEnd}
@@ -167,8 +180,8 @@ export default function DrunkDriveSimulation() {
                 style={{
                   left: `${mentorPosition[0]}px`,
                   top: `${mentorPosition[1]}px`,
-                  width: `${mentorSize.width}px`,
-                  height: `${mentorSize.height}px`,
+                  width: `${MENTOR_SIZE.width}px`,
+                  height: `${MENTOR_SIZE.height}px`,
                   zIndex: draggedItem === "mentor" ? 50 : 20,
                   pointerEvents: draggedItem === "mentor" ? "none" : "auto",
                   transform: draggedItem === "mentor" ? "scale(1.08)" : "scale(1)",
@@ -187,7 +200,7 @@ export default function DrunkDriveSimulation() {
           </div>
         </div>
 
-        <div className="flex flex-col gap-4 w-32 flex-shrink-0">
+        <div className="flex flex-col gap-4 w-full lg:w-32 lg:flex-shrink-0 order-2 lg:order-none">
           <div className="bg-gray-50 border-2 border-gray-300 rounded-lg p-4">
             <p className="text-xs font-semibold text-gray-700 mb-3 text-center">Drag Items</p>
             {!isCompleted && (

@@ -2,6 +2,15 @@
 
 import { useState, useRef, useCallback } from "react";
 
+const BASE_DIMENSIONS = { width: 500, height: 500 };
+const HEAD_HITBOX = {
+  x: 250,
+  y: 100,
+  width: 120,
+  height: 80,
+};
+const HELMET_SIZE = { width: 100, height: 80 };
+
 export default function HelmetPrototype() {
   const [draggedItem, setDraggedItem] = useState<string | null>(null);
   const [dragOffset, setDragOffset] = useState<[number, number]>([0, 0]);
@@ -13,34 +22,23 @@ export default function HelmetPrototype() {
   const canvasRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Head hitbox area - invisible collision detection zone
-  const headHitbox = {
-    x: 250,
-    y: 100,
-    width: 120,
-    height: 80,
-  };
-
-  const helmetSize = { width: 100, height: 80 };
-
   const handleDragStart = useCallback((e: React.PointerEvent, itemType: string) => {
     if (isCompleted) return;
     e.preventDefault();
     e.stopPropagation();
     setDraggedItem(itemType);
     
-    const containerRect = containerRef.current?.getBoundingClientRect();
     const canvasRect = canvasRef.current?.getBoundingClientRect();
     
-    if (containerRect && canvasRect) {
+    if (canvasRect) {
       // Start from the cursor position relative to the canvas
       const startX = e.clientX - canvasRect.left;
       const startY = e.clientY - canvasRect.top;
       
       // If item doesn't have position yet, create it at cursor
       if (itemType === "helmet" && !helmetPosition) {
-        setHelmetPosition([startX - helmetSize.width / 2, startY - helmetSize.height / 2]);
-        setDragOffset([helmetSize.width / 2, helmetSize.height / 2]);
+        setHelmetPosition([startX - HELMET_SIZE.width / 2, startY - HELMET_SIZE.height / 2]);
+        setDragOffset([HELMET_SIZE.width / 2, HELMET_SIZE.height / 2]);
       } else if (helmetPosition) {
         setDragOffset([
           e.clientX - canvasRect.left - helmetPosition[0],
@@ -56,11 +54,11 @@ export default function HelmetPrototype() {
       e.preventDefault();
       e.stopPropagation();
       const rect = canvasRef.current.getBoundingClientRect();
-      const x = Math.max(0, Math.min(rect.width - helmetSize.width, e.clientX - rect.left - dragOffset[0]));
-      const y = Math.max(0, Math.min(rect.height - helmetSize.height, e.clientY - rect.top - dragOffset[1]));
+      const x = Math.max(0, Math.min(rect.width - HELMET_SIZE.width, e.clientX - rect.left - dragOffset[0]));
+      const y = Math.max(0, Math.min(rect.height - HELMET_SIZE.height, e.clientY - rect.top - dragOffset[1]));
       setHelmetPosition([x, y]);
     },
-    [draggedItem, dragOffset, isCompleted, helmetSize]
+    [draggedItem, dragOffset, isCompleted]
   );
 
   const handleDragEnd = useCallback(
@@ -82,18 +80,25 @@ export default function HelmetPrototype() {
       const currentX = helmetPosition[0];
       const currentY = helmetPosition[1];
 
-      // Check if any part of helmet overlaps with head hitbox
+      const rect = canvasRef.current?.getBoundingClientRect();
+      if (!rect) {
+        setDraggedItem(null);
+        return;
+      }
+
+      const scaleX = rect.width / BASE_DIMENSIONS.width;
+      const scaleY = rect.height / BASE_DIMENSIONS.height;
+
       const helmetLeft = currentX;
-      const helmetRight = currentX + helmetSize.width;
+      const helmetRight = currentX + HELMET_SIZE.width;
       const helmetTop = currentY;
-      const helmetBottom = currentY + helmetSize.height;
+      const helmetBottom = currentY + HELMET_SIZE.height;
 
-      const headLeft = headHitbox.x;
-      const headRight = headHitbox.x + headHitbox.width;
-      const headTop = headHitbox.y;
-      const headBottom = headHitbox.y + headHitbox.height;
+      const headLeft = HEAD_HITBOX.x * scaleX;
+      const headRight = (HEAD_HITBOX.x + HEAD_HITBOX.width) * scaleX;
+      const headTop = HEAD_HITBOX.y * scaleY;
+      const headBottom = (HEAD_HITBOX.y + HEAD_HITBOX.height) * scaleY;
 
-      // Check for overlap - more forgiving collision detection
       const overlaps = !(
         helmetRight < headLeft ||
         helmetLeft > headRight ||
@@ -130,7 +135,7 @@ export default function HelmetPrototype() {
 
       setDraggedItem(null);
     },
-    [draggedItem, helmetPosition, isCompleted, helmetSize, headHitbox]
+    [draggedItem, helmetPosition, isCompleted]
   );
 
   return (
@@ -144,9 +149,9 @@ export default function HelmetPrototype() {
       </div>
 
       {/* Main Container with Sidebar */}
-      <div ref={containerRef} className="flex gap-4 items-start">
+      <div ref={containerRef} className="flex flex-col lg:flex-row gap-4 items-stretch">
         {/* Left Sidebar - Draggable Items */}
-        <div className="flex flex-col gap-4 w-32 flex-shrink-0">
+        <div className="flex flex-col gap-4 w-full lg:w-32 lg:flex-shrink-0 order-2 lg:order-none">
           <div className="bg-gray-50 border-2 border-gray-300 rounded-lg p-4">
             <p className="text-xs font-semibold text-gray-700 mb-3 text-center">Drag Items</p>
             
@@ -169,13 +174,11 @@ export default function HelmetPrototype() {
         </div>
 
         {/* Canvas Area */}
-        <div className="flex-1">
+        <div className="flex-1 order-1 lg:order-none w-full">
           <div
             ref={canvasRef}
-            className="relative border-2 border-gray-300 rounded-lg bg-white overflow-hidden"
+            className="relative border-2 border-gray-300 rounded-lg bg-white overflow-hidden h-[360px] sm:h-[420px] lg:h-[500px]"
             style={{
-              width: "100%",
-              height: "500px",
               backgroundColor: "#ffffff",
             }}
             onPointerMove={handleDrag}
@@ -210,8 +213,8 @@ export default function HelmetPrototype() {
                 style={{
                   left: `${helmetPosition[0]}px`,
                   top: `${helmetPosition[1]}px`,
-                  width: `${helmetSize.width}px`,
-                  height: `${helmetSize.height}px`,
+                  width: `${HELMET_SIZE.width}px`,
+                  height: `${HELMET_SIZE.height}px`,
                   zIndex: draggedItem === "helmet" ? 50 : 20,
                   opacity: 1,
                   transform: draggedItem === "helmet" ? "scale(1.1)" : "scale(1)",

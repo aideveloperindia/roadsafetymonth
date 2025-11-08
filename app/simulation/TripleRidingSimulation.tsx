@@ -2,6 +2,15 @@
 
 import { useState, useRef, useCallback } from "react";
 
+const BASE_DIMENSIONS = { width: 500, height: 500 };
+const TARGET_HITBOX = {
+  x: 200,
+  y: 150,
+  width: 200,
+  height: 150,
+};
+const DISCIPLINE_SIZE = { width: 120, height: 100 };
+
 export default function TripleRidingSimulation() {
   const [draggedItem, setDraggedItem] = useState<string | null>(null);
   const [dragOffset, setDragOffset] = useState<[number, number]>([0, 0]);
@@ -14,34 +23,23 @@ export default function TripleRidingSimulation() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Hitbox for the triple riding image (center area)
-  const targetHitbox = {
-    x: 200,
-    y: 150,
-    width: 200,
-    height: 150,
-  };
-
-  const disciplineSize = { width: 120, height: 100 };
-
   const handleDragStart = useCallback((e: React.PointerEvent, itemType: string) => {
     if (isCompleted) return;
     e.preventDefault();
     e.stopPropagation();
     setDraggedItem(itemType);
     
-    const containerRect = containerRef.current?.getBoundingClientRect();
     const canvasRect = canvasRef.current?.getBoundingClientRect();
     
-    if (containerRect && canvasRect) {
+    if (canvasRect) {
       // Start from the cursor position relative to the entire container
       const startX = e.clientX - canvasRect.left;
       const startY = e.clientY - canvasRect.top;
       
       // If item doesn't have position yet, create it at cursor
       if (itemType === "discipline" && !disciplinePosition) {
-        setDisciplinePosition([startX - disciplineSize.width / 2, startY - disciplineSize.height / 2]);
-        setDragOffset([disciplineSize.width / 2, disciplineSize.height / 2]);
+        setDisciplinePosition([startX - DISCIPLINE_SIZE.width / 2, startY - DISCIPLINE_SIZE.height / 2]);
+        setDragOffset([DISCIPLINE_SIZE.width / 2, DISCIPLINE_SIZE.height / 2]);
       } else if (disciplinePosition) {
         setDragOffset([
           e.clientX - canvasRect.left - disciplinePosition[0],
@@ -57,11 +55,11 @@ export default function TripleRidingSimulation() {
       e.preventDefault();
       e.stopPropagation();
       const rect = canvasRef.current.getBoundingClientRect();
-      const x = Math.max(0, Math.min(rect.width - disciplineSize.width, e.clientX - rect.left - dragOffset[0]));
-      const y = Math.max(0, Math.min(rect.height - disciplineSize.height, e.clientY - rect.top - dragOffset[1]));
+      const x = Math.max(0, Math.min(rect.width - DISCIPLINE_SIZE.width, e.clientX - rect.left - dragOffset[0]));
+      const y = Math.max(0, Math.min(rect.height - DISCIPLINE_SIZE.height, e.clientY - rect.top - dragOffset[1]));
       setDisciplinePosition([x, y]);
     },
-    [draggedItem, dragOffset, isCompleted, disciplineSize]
+    [draggedItem, dragOffset, isCompleted]
   );
 
   const handleDragEnd = useCallback(
@@ -83,16 +81,25 @@ export default function TripleRidingSimulation() {
       const currentX = disciplinePosition[0];
       const currentY = disciplinePosition[1];
 
+      const rect = canvasRef.current?.getBoundingClientRect();
+      if (!rect) {
+        setDraggedItem(null);
+        return;
+      }
+
+      const scaleX = rect.width / BASE_DIMENSIONS.width;
+      const scaleY = rect.height / BASE_DIMENSIONS.height;
+
       // Check if any part of discipline overlaps with target hitbox
       const disciplineLeft = currentX;
-      const disciplineRight = currentX + disciplineSize.width;
+      const disciplineRight = currentX + DISCIPLINE_SIZE.width;
       const disciplineTop = currentY;
-      const disciplineBottom = currentY + disciplineSize.height;
+      const disciplineBottom = currentY + DISCIPLINE_SIZE.height;
 
-      const targetLeft = targetHitbox.x;
-      const targetRight = targetHitbox.x + targetHitbox.width;
-      const targetTop = targetHitbox.y;
-      const targetBottom = targetHitbox.y + targetHitbox.height;
+      const targetLeft = TARGET_HITBOX.x * scaleX;
+      const targetRight = (TARGET_HITBOX.x + TARGET_HITBOX.width) * scaleX;
+      const targetTop = TARGET_HITBOX.y * scaleY;
+      const targetBottom = (TARGET_HITBOX.y + TARGET_HITBOX.height) * scaleY;
 
       // AABB collision detection
       const overlaps = !(
@@ -140,7 +147,7 @@ export default function TripleRidingSimulation() {
 
       setDraggedItem(null);
     },
-    [draggedItem, disciplinePosition, isCompleted, disciplineSize, targetHitbox]
+    [draggedItem, disciplinePosition, isCompleted]
   );
 
   return (
@@ -153,10 +160,14 @@ export default function TripleRidingSimulation() {
         </p>
       </div>
 
+      <p className="text-xs text-slate-500 text-center lg:hidden mt-4">
+        Tip: drag the item below and drop it over the highlighted spot to complete the scene.
+      </p>
+
       {/* Main Container with Sidebar */}
-      <div ref={containerRef} className="flex gap-4 items-start">
+      <div ref={containerRef} className="flex flex-col lg:flex-row gap-4 items-stretch">
         {/* Left Sidebar - Draggable Items */}
-        <div className="flex flex-col gap-4 w-32 flex-shrink-0">
+        <div className="flex flex-col gap-4 w-full lg:w-32 lg:flex-shrink-0 order-2 lg:order-none">
           <div className="bg-gray-50 border-2 border-gray-300 rounded-lg p-4">
             <p className="text-xs font-semibold text-gray-700 mb-3 text-center">Drag Items</p>
             
@@ -179,13 +190,11 @@ export default function TripleRidingSimulation() {
         </div>
 
         {/* Canvas Area */}
-        <div className="flex-1">
+        <div className="flex-1 order-1 lg:order-none w-full">
           <div
             ref={canvasRef}
-            className="relative border-2 border-gray-300 rounded-lg bg-white overflow-hidden"
+            className="relative border-2 border-gray-300 rounded-lg bg-white overflow-hidden h-[360px] sm:h-[420px] lg:h-[500px]"
             style={{
-              width: "100%",
-              height: "500px",
               backgroundColor: "#ffffff",
             }}
             onPointerMove={handleDrag}
@@ -240,8 +249,8 @@ export default function TripleRidingSimulation() {
                 style={{
                   left: `${disciplinePosition[0]}px`,
                   top: `${disciplinePosition[1]}px`,
-                  width: `${disciplineSize.width}px`,
-                  height: `${disciplineSize.height}px`,
+                  width: `${DISCIPLINE_SIZE.width}px`,
+                  height: `${DISCIPLINE_SIZE.height}px`,
                   zIndex: draggedItem === "discipline" ? 50 : 20,
                   opacity: 1,
                   transform: draggedItem === "discipline" ? "scale(1.1)" : "scale(1)",

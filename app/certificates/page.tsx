@@ -45,7 +45,7 @@ export default function CertificatesPage() {
       </div>
 
       <div className="rs-table-wrapper">
-        <table className="rs-table text-sm">
+        <table className="rs-table text-sm min-w-[640px]">
           <thead>
             <tr>
               <th className="text-left">Code</th>
@@ -64,6 +64,9 @@ export default function CertificatesPage() {
           </tbody>
         </table>
       </div>
+      <p className="text-xs text-slate-500 sm:hidden">
+        Tip: drag sideways to view the full certificate table.
+      </p>
 
       <div className="rs-card p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
