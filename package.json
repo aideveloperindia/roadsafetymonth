@@ -30,7 +30,7 @@
     "jspdf": "^2.5.2",
     "lucide-react": "^0.344.0",
     "mongoose": "^8.0.0",
-    "next": "16.0.1",
+    "next": "16.0.7",
     "next-auth": "^4.24.5",
     "phaser": "^3.80.1",
     "puppeteer-core": "^21.6.0",
